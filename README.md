@@ -23,22 +23,33 @@ socket creation using socket(domain, type, protocol) api, which takes 3 argument
 3) int: protocol, which is 0 for IP
 
 * Setsockopt
-`int setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen);`
+```
+int setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen);
+```
 This step is an optional step which could be used to manipulate the options referred by socket descriptor. Can be used to allow server to  have multiple parallel client connection. It can also be used to allow address reuse.
 
 
 * Bind
-`int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);`
+
+``` 
+int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+```
 bind helps to bind the socket to the address provided in the second argument we bind the server to the localhost, hence we use INADDR_ANY to specify the IP address.                      
 
 
 * Listen
-`int listen(int sockfd, int backlog);`
+
+```
+int listen(int sockfd, int backlog);
+```
 Listen allows to set the server to listen for incoming request from client, the backlog argument is used to define the maximum length upto which pending connection can get queued up.
 
 
 * Accept
-`int new_socket= accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);`
+
+```
+int new_socket= accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+```
 It extracts the first connection request on the queue of pending connections for the listening socket, sockfd, creates a new connected socket, and returns a new file descriptor referring to that socket. At this point, connection is established between client and server, and they are ready to transfer data.
 
 ### Stages in setting up Client
@@ -47,7 +58,9 @@ There are 2 steps,
 * Socket creation - same as socket creation for server
 
 * Connect
-`int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);`
+```
+int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+```
 The connect() system call connects the socket referred to by the file descriptor sockfd to the address specified by addr. Server’s address and port is specified in addr.
 
 ## Code Details
