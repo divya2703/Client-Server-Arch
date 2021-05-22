@@ -137,13 +137,10 @@ int main(int argc , char *argv[])
         activity = select( max_sd + 1, &readfds, NULL, NULL, NULL);
 
 		// If server is closed, it gracefully closes all the connected client socket connections
-        if(close_soc)
-        {
-            for(int i=0; i<max_clients; i++)
-            {
+        if(close_soc){
+            for(int i=0; i<max_clients; i++){
         	   sd = client_socket[i];
-        	   if(sd > 0)
-               {
+        	   if(sd > 0){
         		  getpeername(sd, (struct sockaddr*)&serv_address, (socklen_t*)&addrlen);   
         		  printf("Disconnecting Client : IP %s and port %d \n", inet_ntoa(serv_address.sin_addr), ntohs(serv_address.sin_port));     
         		  close( sd );   
@@ -203,13 +200,13 @@ int main(int argc , char *argv[])
                     //checking for error in the read message    
             		if(crc_check(buffer)){
         		  		getpeername(sd, (struct sockaddr*)&serv_address, (socklen_t*)&addrlen);           		  		            		
-                        buffer[strlen(buffer)-8] = '\0';
+                        buffer[strlen(buffer) - 8] = '\0';
     					strcpy(buffer, binaryToString(buffer));				//convert read message to binary 
                         printf("Message Received : %s from IP %s and port %d \n", buffer, inet_ntoa(serv_address.sin_addr), ntohs(serv_address.sin_port));           
     					printf("Sending ACK\n");
     					char * ACK = stringToBinary("ACK");
     					bzero(buffer, MAX); 
-    					strcpy(buffer, ACK);					//copy ACK on buffer
+    					strcpy(buffer, ACK);					    //copy ACK on buffer
     					strcpy(buffer, message_gen(buffer));		//Add CRC bits
     					strcpy(buffer, error_gen(buffer,prob));		//Generate error
     					send(sd, buffer, sizeof(buffer),0);			//send Acknowledgement
@@ -218,10 +215,10 @@ int main(int argc , char *argv[])
             		}
 
             	    else{
-                    	getpeername(sd, (struct sockaddr*)&serv_address, (socklen_t*)&addrlen); 
+                    	getpeername(sd, (struct sockaddr*) &serv_address, (socklen_t*) &addrlen); 
                     	printf("Packets Received in Error from IP %s and port %d \n", inet_ntoa(serv_address.sin_addr), ntohs(serv_address.sin_port));
                     	printf("Sending NACK\n");
-    					char * NACK = stringToBinary("NACK");
+    					char* NACK = stringToBinary("NACK");
     					bzero(buffer, MAX); 
     					strcpy(buffer, NACK);
     					strcpy(buffer, message_gen(buffer));
@@ -255,28 +252,23 @@ char *stringToBinary(char *s)
     char *start  = binary;
     errno = 0;
 
-    if (s == NULL)
-    {
+    if (s == NULL){
         return NULL;
     }
 
-    if(binary == NULL)
-    {
-        fprintf(stderr,"Failed To Allocate Space in function stringToBinary(%s): %s\n",s, strerror(errno));
+    if(binary == NULL){
+        fprintf(stderr, "Failed To allocate space in function stringToBinary(%s): %s\n", s, strerror(errno));
         return NULL;
     }
 
-    if (slen == 0)
-    {
+    if (slen == 0){
         *binary = '\0';
         return binary;
     }
-    for (ptr = s; *ptr != '\0'; ptr++)
-    {
+    for (ptr = s; *ptr != '\0'; ptr++){
         /* perform bitwise AND for every bit of the character */
         // loop over the input-character bits
-        for (int i = CHAR_BIT - 1; i >= 0; i--, binary++)
-        {
+        for (int i = CHAR_BIT - 1; i >= 0; i--, binary++){
             *binary = (*ptr & 1 << i) ? '1' : '0';
         }
     }
@@ -286,11 +278,9 @@ char *stringToBinary(char *s)
 }
 
 /*  helper function for string to binary*/
-void binaryToText(char *binary, int binaryLength, char *text, int symbolCount)
-{
+void binaryToText(char *binary, int binaryLength, char *text, int symbolCount){
     int i;
-    for(i = 0; i < binaryLength; i+=8, binary += 8)
-    {
+    for(i = 0; i < binaryLength; i+=8, binary += 8){
         char *byte = binary;
         byte[8] = '\0';
         *text++ = binaryToDecimal(byte, 8);
@@ -299,15 +289,13 @@ void binaryToText(char *binary, int binaryLength, char *text, int symbolCount)
 }
 
 /*  helper function used in binary to tex*/
-unsigned long binaryToDecimal(char *binary, int length)
-{
+unsigned long binaryToDecimal(char *binary, int length){
     int i;
     unsigned long decimal = 0;
     unsigned long weight = 1;
     binary += length - 1;
     weight = 1;
-    for(i = 0; i < length; ++i, --binary)
-    {
+    for(i = 0; i < length; ++i, --binary){
         if(*binary == '1')
             decimal += weight;
         weight *= 2;
@@ -338,101 +326,81 @@ char* message_gen(char* msg)
     int n = 0;
     char gen[] = "100000111";
     char temp[10000];
-    strcpy(temp, msg);				//temp---> copy of original message        
-    while(msg[m] != '\0')
-    {
+    strcpy(temp, msg);				                    //temp---> copy of original message        
+    while(msg[m] != '\0'){
         m++;
     }
-    while(gen[n] != '\0')
-    {
+    while(gen[n] != '\0'){
         n++;
     }
-    for(int i=0; i<n-1; i++)			//Appending 8 '0s' at the end of message
-    {
+   
+    for(int i=0; i<n-1; i++){                           //Appending 8 '0s' at the end of message
         temp[m+i] = '0';
     }
     temp[m+n-1] = '\0';
     msg[m] = '\0';   
     m = m+n-1;  
-    for(int i=0; i <= m-n; i++)
-    {
-        if(temp[i] == '1')			//division by generator polynomial
-        {
-            for(int j=0; j<n; j++)
-            {								//bitwise XOR
-                if(temp[i+j] != gen[j])
-                {
+    for(int i=0; i <= m-n; i++){
+        if(temp[i] == '1'){			                    //division by generator polynomial
+            for(int j=0; j<n; j++){                     //bitwise XOR					
+                if(temp[i+j] != gen[j]){
                     temp[i+j] = '1';
                 }
-                else if(temp[i+j] == gen[j] && gen[j] == '1')
-                {
+                else if(temp[i+j] == gen[j] && gen[j] == '1'){
                     temp[i+j] = '0';
                 }
             }
-            while(i<m-n-1 && temp[i+1] != '1')
-            {
+            while(i<m-n-1 && temp[i+1] != '1'){
                 i++;
             }               
         }
     }
     char ans[10000];
-    for(int i=0; i<n-1; i++)					// ans--> last 8 bits of the CRC generated
-    {
+    for(int i=0; i<n-1; i++){					       // ans--> last 8 bits of the CRC generated
         ans[i] = temp[m-n+1+i];
     }
-    ans[n-1] = '\0';   					//termnating string
-    strcat(msg, ans); 					//appending CRC to original message
+    ans[n-1] = '\0';   					                //termnating string
+    strcat(msg, ans); 					                //appending CRC to original message
     return msg;
 }
 
 
 /* Chack if the T(x) received from client is divisible by the CRC-8 generator polynomial 
     Retruns 0 if error exists else returns 1*/
-int crc_check(char* msg)
-{
+int crc_check(char* msg){
     char gen[] = "100000111";
     char temp[10000];
     strcpy(temp, msg);
     int m = 0;
     int n = 0;     
-    while(msg[m] != '\0')      // calculating length
-    {
+    while(msg[m] != '\0'){                                  // calculating length
         m++;
     }
-    while(gen[n] != '\0')
-    {
+    while(gen[n] != '\0'){
         n++;
     }
     msg[m] = '\0';   
-    for(int i=0; i <= m-n; i++)
-    {
-        if(temp[i] == '1')					//Performing division by bitwise XOR
-        {
-            for(int j=0; j<n; j++)
-            {
-                if(temp[i+j] != gen[j]) 			//bit=1 if different bits 
-                {
+    for(int i=0; i <= m-n; i++){
+        if(temp[i] == '1'){				                    //Performing division by bitwise XOR
+            for(int j=0; j<n; j++){
+                if(temp[i+j] != gen[j]){			        //bit=1 if different bits 
                     temp[i+j] = '1';
                 }
-                else if(temp[i+j] == gen[j] && gen[j] == '1')
-                {
+                else if(temp[i+j] == gen[j] && gen[j] == '1'){
                     temp[i+j] = '0';
                 }
             }
-            while(i<m-n-1 && temp[i+1]!='1')			//traversing to find the first '1'
-            {
+            while(i<m-n-1 && temp[i+1]!='1'){			    //traversing to find the first '1'
                 i++;
             } 
         }
     }
-    for(int i=0; i<m; i++)						//if any bit is 1, report error
-    {
-        if(temp[i] == '1')
-        {
+    for(int i=0; i<m; i++){						            //if any bit is 1, report error
+        if(temp[i] == '1'){
             return 0;
         }
     }
-    return 1;								//all bits zero return 1 ie no error
+    return 1;								                //all bits zero return 1 ie no error
 }
 
 
@@ -443,16 +411,13 @@ char *error_gen(char *s, double p)		//code to generate error
 	int upper = strlen(s)-1;
 	double random_num = (double)rand() / (double)RAND_MAX;
 	printf("Random Number generated  : %lf\n",random_num);
-	if(random_num <= p)
-	{
+	if(random_num <= p){
 											//to generate random number in range [0, messageLength-1]
 		int index = rand()%(upper-lower+1) + lower;
-		if(s[index] == '1')					//bit flip at index calculated randomly
-		{
+		if(s[index] == '1'){				//bit flip at index calculated randomly
 			s[index] = '0';
 		}
-		else
-		{
+		else{
 			s[index] = '1';
 		}
 	}
