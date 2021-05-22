@@ -145,7 +145,7 @@ int main(int argc , char *argv[])
         	   if(sd > 0)
                {
         		  getpeername(sd, (struct sockaddr*)&serv_address, (socklen_t*)&addrlen);   
-        		  printf("Disconnecting Client : IP %s and port %d \n" ,inet_ntoa(serv_address.sin_addr), ntohs(serv_address.sin_port));     
+        		  printf("Disconnecting Client : IP %s and port %d \n", inet_ntoa(serv_address.sin_addr), ntohs(serv_address.sin_port));     
         		  close( sd );   
         		  client_socket[i] = 0;           		
         	   }
@@ -154,30 +154,25 @@ int main(int argc , char *argv[])
         }
 		
 		// Checks for error in any of the connections
-        if ((activity < 0) && (errno != EINTR))   
-        {   
+        if ((activity < 0) && (errno != EINTR)) {   
             printf("Error in one of the connections\n");   
         }   
          
         // Check if master socket is in the readfds set of client fd
-        if (FD_ISSET(master_socket, &readfds))   
-        {   
+        if (FD_ISSET(master_socket, &readfds)) {   
         	// accepts incoming requests from clients and rejects if error
-            if ( (new_socket = accept(master_socket, (struct sockaddr *)&serv_address, (socklen_t*)&addrlen) ) <0 )   
-            {   
+            if ((new_socket = accept(master_socket, (struct sockaddr *)&serv_address, (socklen_t*)&addrlen)) <0 ){   
                 perror("Error in Accepting Request\n ");   
                 exit(EXIT_FAILURE);   
             }   
 
             //displays new socket connection
-            printf("New connection : Socket FD is %d , IP is %s , Port is %d\n" , new_socket ,inet_ntoa(serv_address.sin_addr) , ntohs(serv_address.sin_port));   
+            printf("New connection : Socket FD is %d, IP is %s, Port is %d\n", new_socket, inet_ntoa(serv_address.sin_addr), ntohs(serv_address.sin_port));   
               
             //add new socket to array of sockets  
-            for (int i = 0; i < max_clients; i++)   
-            {   
+            for (int i = 0; i < max_clients; i++) {   
                 //if position is empty  
-                if( client_socket[i] == 0 )   
-                {   
+                if( client_socket[i] == 0 ) {   
                     client_socket[i] = new_socket;     
                     break;   
                 }   
@@ -185,17 +180,14 @@ int main(int argc , char *argv[])
         }   
          
         //checks for actvity in each client
-        for (int i = 0; i < max_clients; i++)   
-        {   
+        for (int i = 0; i < max_clients; i++){   
         	//extracts socket descriptor of the currently serving client
             sd = client_socket[i];    
             //check if its present in socket descriptor set
-            if (FD_ISSET(sd, &readfds))   
-            {   
+            if (FD_ISSET(sd, &readfds)){   
                 //Check if it was for closing , and also read the  
                 //incoming message  ,
-                if ((valread = read(sd, buffer, MAX)) == 0)   
-                {   
+                if ((valread = read(sd, buffer, MAX)) == 0){   
                     //Displays the detail of client that disconnected  
                     getpeername(sd, (struct sockaddr*)&serv_address, (socklen_t*)&addrlen);   
                     printf("Client Disconnected : IP is %s , Port is %d \n", inet_ntoa(serv_address.sin_addr), ntohs(serv_address.sin_port));   
@@ -205,12 +197,11 @@ int main(int argc , char *argv[])
                     client_socket[i] = 0;   
                 }   
              
-                else 
-                {   
+                else {   
                     //terminate the string
-                    buffer[valread] = '\0';     
-            		if(crc_check(buffer))				//checking for error in the read message
-            		{
+                    buffer[valread] = '\0'; 
+                    //checking for error in the read message    
+            		if(crc_check(buffer)){
         		  		getpeername(sd, (struct sockaddr*)&serv_address, (socklen_t*)&addrlen);           		  		            		
                         buffer[strlen(buffer)-8] = '\0';
     					strcpy(buffer, binaryToString(buffer));				//convert read message to binary 
@@ -226,8 +217,7 @@ int main(int argc , char *argv[])
 
             		}
 
-            	    else
-                    {
+            	    else{
                     	getpeername(sd, (struct sockaddr*)&serv_address, (socklen_t*)&addrlen); 
                     	printf("Packets Received in Error from IP %s and port %d \n", inet_ntoa(serv_address.sin_addr), ntohs(serv_address.sin_port));
                     	printf("Sending NACK\n");
