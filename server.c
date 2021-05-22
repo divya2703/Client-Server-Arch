@@ -42,7 +42,7 @@ int main(int argc , char *argv[])
     int opt = TRUE;
     char buffer[MAX];  					//data buffer of 1K  
     struct sockaddr_in serv_address;	//server address structure	
-	double prob=0;						//error probability
+	double prob = 0;						//error probability
 	printf("Enter the Error Probability : ");
 	scanf("%lf", &prob);  
 
@@ -55,7 +55,7 @@ int main(int argc , char *argv[])
     }   
          
     //Creates a Master Socket if successful.
-    if( (master_socket = socket(AF_INET , SOCK_STREAM , 0)) == 0)   
+    if( (master_socket = socket(AF_INET, SOCK_STREAM, 0)) == 0)   
     {   
         perror("Socket Creation Failed\n");   
         exit(EXIT_FAILURE);   

@@ -361,6 +361,7 @@ int crc_check(char *msg)
     }
     return 1;
 } 
+
 char *error_gen(char *s, double p)		//code to generate error
 {
 	int lower = 0;						
