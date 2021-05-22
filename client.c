@@ -26,11 +26,14 @@ char *message_gen(char *msg);
 int crc_check(char *msg); 
 char *error_gen(char *s,double p);
 
+
+
+
 int main(int argc,char **argv) 
 { 
   	srand(time(0));          //Providing seed to generate random number
 	
-	double prob=0;			// prob stores probability of error
+	double prob = 0;			// prob stores probability of error
 	int sock_num;  			//socket number
     int ready_for_reading;
     int reading;	
@@ -51,7 +54,7 @@ int main(int argc,char **argv)
 	
     
     // CREATING SOCKET
-    sock_num= socket(AF_INET, SOCK_STREAM, 0);  //AF_INET-->IPV4, SOCK_STREAM---> TCP full duplex 
+    sock_num = socket(AF_INET, SOCK_STREAM, 0);  //AF_INET-->IPV4, SOCK_STREAM---> TCP full duplex 
     											//sock_num stores non negative file descriptor of the created socket
     											//used for further operations                                       
     if (sock_num == -1)
@@ -66,12 +69,12 @@ int main(int argc,char **argv)
     bzero(&serv_addr, sizeof(serv_addr)); 		//initializes buffer to zero
 
     FD_ZERO(&readfds);							//initializes file descriptor set to zero
-    FD_SET(sock_num,&readfds);					//sets the bit for the file descriptor sock_num in the file descriptor set readfds.
+    FD_SET(sock_num, &readfds);					//sets the bit for the file descriptor sock_num in the file descriptor set readfds.
 
 	// ASSIGN IP, PORT
-    serv_addr.sin_family= AF_INET;				       //IPV protocol    
+    serv_addr.sin_family = AF_INET;				       //IPV protocol    
     serv_addr.sin_addr.s_addr = inet_addr(argv[1]);    //Assigning IP addr
-    serv_addr.sin_port= htons(atoi(argv[2]));	       // Assigning port number
+    serv_addr.sin_port = htons(atoi(argv[2]));	       // Assigning port number
     
     
 	// CONNECTING CLIENT SOCKET TO SERVER SOCKET
@@ -100,7 +103,7 @@ int main(int argc,char **argv)
 		}
 		
 		printf("Enter the string : ");  //taking input
-		while (close_soc==0 && (buffer[n++] = getchar()) != '\n') ;   //continue reading message and storing it in
+		while (close_soc == 0 && (buffer[n++] = getchar()) != '\n') ;   //continue reading message and storing it in
 																	  // buffer until ctrl+c or enter is encountered
 		buffer[n-1]='\0';											  // to mark the end of string
 		if(close_soc == 1)
@@ -110,10 +113,10 @@ int main(int argc,char **argv)
 		 
 		char org_msg[MAX];						
 		
-		strcpy(buffer,stringToBinary(buffer));						//conversion from string to binary
+		strcpy(buffer, stringToBinary(buffer));						//conversion from string to binary
 		strcpy(buffer, message_gen(buffer));						// generating T(x), message after adding CRC bits
 		strcpy(org_msg,buffer);										// original message after adding CRC
-		strcpy(buffer,error_gen(buffer,prob));						// adding error
+		strcpy(buffer, error_gen(buffer,prob));						// adding error
 		
 		send(sock_num, buffer, sizeof(buffer),0); 					//sending server generated message
 		bzero(buffer, sizeof(buffer)); 
@@ -124,37 +127,36 @@ int main(int argc,char **argv)
 			FD_SET(sock_num, &readfds);							// assigning readfds socket file descriptor
 			
 			start = clock();									//starting clock
-			ready_for_reading=select(sizeof(readfds)*8 ,&readfds,NULL,NULL,&time_out);  //checking if there's anything to be read until timeout
+			ready_for_reading = select(sizeof(readfds)*8, &readfds, NULL, NULL, &time_out);  //checking if there's anything to be read until timeout
 			end = clock();										
 			
 			if(ready_for_reading == 0)							//if there's nothing received after timeout
 			{
 				printf("TimeOut, Retransmitting Data\n");		
-				bzero(buffer,sizeof(buffer));
-				strcpy(buffer,org_msg);
-				strcpy(buffer,error_gen(buffer,prob));
-				send(sock_num, buffer, sizeof(buffer),0); 
+				bzero(buffer, sizeof(buffer));
+				strcpy(buffer, org_msg);
+				strcpy(buffer, error_gen(buffer, prob));
+				send(sock_num, buffer, sizeof(buffer), 0); 
 				
-				bzero(buffer,sizeof(buffer));
+				bzero(buffer, sizeof(buffer));
 				time_out.tv_sec = 10;    						// Initializing the timer again
 				time_out.tv_usec = 0;
 			}
 			else if(ready_for_reading == 1)						//If something is received, read from the sock_num
 			{
-				bzero(buffer,sizeof(buffer));
+				bzero(buffer, sizeof(buffer));
 				read(sock_num, buffer, sizeof(buffer));				
 				
 				if(crc_check(buffer))							//if crc check successful, check whether its ACK or NACK
 				{
 					char buff_temp[MAX];
 					int buff_len = strlen(buffer);
-					buffer[buff_len-8]='\0';					// to remove the last 8 bit added after adding CRC
-					strcpy(buff_temp,stringToBinary("ACK"));	//storing binary value of 'ACK'
+					buffer[buff_len-8] = '\0';					// to remove the last 8 bit added after adding CRC
+					strcpy(buff_temp, stringToBinary("ACK"));	//storing binary value of 'ACK'
 					
-					if(strcmp(buff_temp,buffer) == 0)			// if string comparison is successful,ACK is received
+					if(strcmp(buff_temp, buffer) == 0)			// if string comparison is successful,ACK is received
 					{
 						printf("Received ACK\n");
-						
 						time_out.tv_sec = 10;
 						time_out.tv_usec = 0;
 						break;
@@ -163,12 +165,12 @@ int main(int argc,char **argv)
 					{	
 						printf("Received NACK, Retransmitting Data\n");
 						
-						bzero(buffer,sizeof(buffer));
-						strcpy(buffer,org_msg);
-						strcpy(buffer,error_gen(buffer,prob));
-						send(sock_num, buffer, sizeof(buffer),0); 
+						bzero(buffer, sizeof(buffer));
+						strcpy(buffer, org_msg);
+						strcpy(buffer, error_gen(buffer, prob));
+						send(sock_num, buffer, sizeof(buffer), 0); 
 						
-						bzero(buffer,sizeof(buffer));
+						bzero(buffer, sizeof(buffer));
 						time_out.tv_sec = 10;    				// Initializing timer to 10 seconds
 						time_out.tv_usec = 0;						
 					}
@@ -179,7 +181,7 @@ int main(int argc,char **argv)
 					printf("Error in ACK or NACK, Waiting ... \n");
 					
 					cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-					double t_out = (double)time_out.tv_sec + (double)time_out.tv_usec*pow(10,-6) - cpu_time_used;
+					double t_out = (double)time_out.tv_sec + (double)time_out.tv_usec*pow(10, -6) - cpu_time_used;
 					int sec = t_out;
 					double mili = t_out - (double)sec;
 					time_out.tv_sec = sec;
@@ -269,54 +271,54 @@ char *message_gen(char *msg)
         n++;
     }
     
-    for(int i = 0;i < n-1;i++)
+    for(int i = 0; i< n-1; i++)
     {
-        temp[m+i]='0';
+        temp[m+i] = '0';
     }
     
-    temp[m+n-1]='\0';
-    msg[m]='\0';   
-    m=m+n-1;  
+    temp[m+n-1] = '\0';
+    msg[m] = '\0';   
+    m = m+n-1;  
     
     for(int i=0;i <= m-n;i++)
     {
         if(temp[i] == '1')
         {
-            for(int j=0;j<n;j++)
+            for(int j=0; j<n; j++)
             {
                 if(temp[i+j] != gen[j])
                 {
-                    temp[i+j]='1';
+                    temp[i+j] = '1';
                 }
-                else if(temp[i+j]==gen[j] && gen[j]=='1')
+                else if(temp[i+j] == gen[j] && gen[j] == '1')
                 {
-                    temp[i+j]='0';
+                    temp[i+j] = '0';
                 }
             }
-            while(i<m-n-1 && temp[i+1]!='1')
+            while(i<m-n-1 && temp[i+1] != '1')
             {
                 i++;
             }               
         }
     }
     
-    for(int i=0;i<n-1;i++)
+    for(int i=0; i<n-1; i++)
     {
         ans[i] = temp[m-n+1+i];
     }
     
-    ans[n-1]='\0';   
-    strcat(msg,ans);   
+    ans[n-1] = '\0';   
+    strcat(msg, ans);   
     return msg;
 }
 
 int crc_check(char *msg)
 {
-    int m=0;
-    int n=0; 
+    int m = 0;
+    int n = 0; 
     char gen[] = "100000111";		//polynomial for CRC-8 x^8 + x^2 + x + 1
     char temp[10000];		
-    strcpy(temp,msg);
+    strcpy(temp, msg);
     
     while(msg[m] != '\0')
     {
@@ -326,31 +328,31 @@ int crc_check(char *msg)
     {
         n++;
     }
-    msg[m]='\0'; 
+    msg[m] = '\0'; 
 
-    for(int i=0;i <= m-n;i++)
+    for(int i=0; i<= m-n; i++)
     {
         if(temp[i] == '1')
         {
-            for(int j=0;j<n;j++)
+            for(int j=0; j<n; j++)
             {
-                if(temp[i+j]!=gen[j])
+                if(temp[i+j] != gen[j])
                 {
-                    temp[i+j]='1';
+                    temp[i+j] = '1';
                 }
-                else if(temp[i+j]==gen[j] && gen[j]=='1')
+                else if(temp[i+j] == gen[j] && gen[j] == '1')
                 {
-                    temp[i+j]='0';
+                    temp[i+j] = '0';
                 }
             }
-            while(i<m-n-1 && temp[i+1]!='1')
+            while(i<m-n-1 && temp[i+1] != '1')
             {
                 i++;
             } 
         }
     }
     
-    for(int i=0;i<m;i++)
+    for(int i=0; i<m; i++)
     {
         if(temp[i] == '1')
         {
@@ -359,12 +361,12 @@ int crc_check(char *msg)
     }
     return 1;
 } 
-char *error_gen(char *s,double p)		//code to generate error
+char *error_gen(char *s, double p)		//code to generate error
 {
 	int lower = 0;						
 	int upper = strlen(s)-1;
 	double random_num = (double)rand() / (double)RAND_MAX;
-	if(random_num<=p)
+	if(random_num <= p)
 	{
 											//to generate random number in range [0, messageLength-1]
 		int index = rand()%(upper-lower+1) + lower;

@@ -44,7 +44,7 @@ int main(int argc , char *argv[])
     struct sockaddr_in serv_address;	//server address structure	
 	double prob=0;						//error probability
 	printf("Enter the Error Probability : ");
-	scanf("%lf",&prob);  
+	scanf("%lf", &prob);  
 
     fd_set readfds;						// Set of Socket Descriptors 
         
@@ -68,7 +68,7 @@ int main(int argc , char *argv[])
  
     
     //"setsockopt" allows Master Socket to connect to Multiple parallel tcp connections
-    if( setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, (char *)&opt,sizeof(opt)) < 0 )   
+    if( setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) < 0 )   
     {   
         perror("Multiple Connection Failed\n");   
         exit(EXIT_FAILURE);   
@@ -87,7 +87,7 @@ int main(int argc , char *argv[])
     serv_address.sin_port = htons(atoi(argv[1]));   
          
     //bind the socket to provided host
-    if (bind(master_socket, (struct sockaddr *)&serv_address, sizeof(serv_address))<0)   
+    if (bind(master_socket, (struct sockaddr *)&serv_address, sizeof(serv_address)) < 0)   
     {   
         perror("Socket Binding Failed\n");   
         exit(EXIT_FAILURE);   
@@ -126,7 +126,7 @@ int main(int argc , char *argv[])
 		         
 		    //if valid socket descriptor then add to read list  
 		    if(sd > 0)   
-		        FD_SET( sd , &readfds);   
+		        FD_SET(sd, &readfds);   
 		         
 		    //stores the maximum file descriptor for select function  
 		    if(sd > max_sd)   
@@ -134,18 +134,18 @@ int main(int argc , char *argv[])
         }   
 
        	// Waits indefinitely for an activity from any of the client side     
-        activity = select( max_sd + 1 , &readfds , NULL , NULL , NULL);
+        activity = select( max_sd + 1, &readfds, NULL, NULL, NULL);
 
 		// If server is closed, it gracefully closes all the connected client socket connections
         if(close_soc)
         {
-            for(int i=0;i<max_clients;i++)
+            for(int i=0; i<max_clients; i++)
             {
         	   sd = client_socket[i];
         	   if(sd > 0)
                {
-        		  getpeername(sd ,(struct sockaddr*)&serv_address ,(socklen_t*)&addrlen);   
-        		  printf("Disconnecting Client : IP %s and port %d \n" ,inet_ntoa(serv_address.sin_addr) , ntohs(serv_address.sin_port));     
+        		  getpeername(sd, (struct sockaddr*)&serv_address, (socklen_t*)&addrlen);   
+        		  printf("Disconnecting Client : IP %s and port %d \n" ,inet_ntoa(serv_address.sin_addr), ntohs(serv_address.sin_port));     
         		  close( sd );   
         		  client_socket[i] = 0;           		
         	   }
@@ -154,7 +154,7 @@ int main(int argc , char *argv[])
         }
 		
 		// Checks for error in any of the connections
-        if ((activity < 0) && (errno!=EINTR))   
+        if ((activity < 0) && (errno != EINTR))   
         {   
             printf("Error in one of the connections\n");   
         }   
@@ -190,15 +190,15 @@ int main(int argc , char *argv[])
         	//extracts socket descriptor of the currently serving client
             sd = client_socket[i];    
             //check if its present in socket descriptor set
-            if (FD_ISSET( sd , &readfds))   
+            if (FD_ISSET(sd, &readfds))   
             {   
                 //Check if it was for closing , and also read the  
                 //incoming message  ,
-                if ((valread = read( sd , buffer, MAX)) == 0)   
+                if ((valread = read(sd, buffer, MAX)) == 0)   
                 {   
                     //Displays the detail of client that disconnected  
-                    getpeername(sd ,(struct sockaddr*)&serv_address ,(socklen_t*)&addrlen);   
-                    printf("Client Disconnected : IP is %s , Port is %d \n" ,inet_ntoa(serv_address.sin_addr) , ntohs(serv_address.sin_port));   
+                    getpeername(sd, (struct sockaddr*)&serv_address, (socklen_t*)&addrlen);   
+                    printf("Client Disconnected : IP is %s , Port is %d \n", inet_ntoa(serv_address.sin_addr), ntohs(serv_address.sin_port));   
                          
                     //Free the socket for future use  
                     close( sd );   
@@ -211,16 +211,16 @@ int main(int argc , char *argv[])
                     buffer[valread] = '\0';     
             		if(crc_check(buffer))				//checking for error in the read message
             		{
-        		  		getpeername(sd ,(struct sockaddr*)&serv_address ,(socklen_t*)&addrlen);           		  		            		
-                        buffer[strlen(buffer)-8]='\0';
-    					strcpy(buffer,binaryToString(buffer));				//convert read message to binary 
-                        printf("Message Received : %s from IP %s and port %d \n" ,buffer,inet_ntoa(serv_address.sin_addr) , ntohs(serv_address.sin_port));           
+        		  		getpeername(sd, (struct sockaddr*)&serv_address, (socklen_t*)&addrlen);           		  		            		
+                        buffer[strlen(buffer)-8] = '\0';
+    					strcpy(buffer, binaryToString(buffer));				//convert read message to binary 
+                        printf("Message Received : %s from IP %s and port %d \n", buffer, inet_ntoa(serv_address.sin_addr), ntohs(serv_address.sin_port));           
     					printf("Sending ACK\n");
-    					char * ACK= stringToBinary("ACK");
+    					char * ACK = stringToBinary("ACK");
     					bzero(buffer, MAX); 
     					strcpy(buffer, ACK);					//copy ACK on buffer
     					strcpy(buffer, message_gen(buffer));		//Add CRC bits
-    					strcpy(buffer,error_gen(buffer,prob));		//Generate error
+    					strcpy(buffer, error_gen(buffer,prob));		//Generate error
     					send(sd, buffer, sizeof(buffer),0);			//send Acknowledgement
     					bzero(buffer, MAX);							//empty the buffer
 
@@ -228,15 +228,15 @@ int main(int argc , char *argv[])
 
             	    else
                     {
-                    	getpeername(sd ,(struct sockaddr*)&serv_address ,(socklen_t*)&addrlen); 
-                    	printf("Packets Received in Error from IP %s and port %d \n" ,inet_ntoa(serv_address.sin_addr) , ntohs(serv_address.sin_port));
+                    	getpeername(sd, (struct sockaddr*)&serv_address, (socklen_t*)&addrlen); 
+                    	printf("Packets Received in Error from IP %s and port %d \n", inet_ntoa(serv_address.sin_addr), ntohs(serv_address.sin_port));
                     	printf("Sending NACK\n");
-    					char * NACK= stringToBinary("NACK");
+    					char * NACK = stringToBinary("NACK");
     					bzero(buffer, MAX); 
     					strcpy(buffer, NACK);
     					strcpy(buffer, message_gen(buffer));
-    					strcpy(buffer,error_gen(buffer,prob));
-    					send(sd, buffer, sizeof(buffer),0);
+    					strcpy(buffer, error_gen(buffer, prob));
+    					send(sd, buffer, sizeof(buffer), 0);
     					bzero(buffer, MAX);
 
             		}
@@ -344,54 +344,54 @@ char* binaryToString(char *binary)
 // Calculates CRC of the original message and appends it to the end of the original message and returns it
 char* message_gen(char* msg)
 {
-    int m=0;
-    int n=0;
+    int m = 0;
+    int n = 0;
     char gen[] = "100000111";
     char temp[10000];
-    strcpy(temp,msg);				//temp---> copy of original message        
-    while(msg[m]!='\0')
+    strcpy(temp, msg);				//temp---> copy of original message        
+    while(msg[m] != '\0')
     {
         m++;
     }
-    while(gen[n]!='\0')
+    while(gen[n] != '\0')
     {
         n++;
     }
-    for(int i=0;i<n-1;i++)			//Appending 8 '0s' at the end of message
+    for(int i=0; i<n-1; i++)			//Appending 8 '0s' at the end of message
     {
-        temp[m+i]='0';
+        temp[m+i] = '0';
     }
-    temp[m+n-1]='\0';
-    msg[m]='\0';   
-    m=m+n-1;  
-    for(int i=0;i <= m-n;i++)
+    temp[m+n-1] = '\0';
+    msg[m] = '\0';   
+    m = m+n-1;  
+    for(int i=0; i <= m-n; i++)
     {
-        if(temp[i]=='1')			//division by generator polynomial
+        if(temp[i] == '1')			//division by generator polynomial
         {
-            for(int j=0;j<n;j++)
+            for(int j=0; j<n; j++)
             {								//bitwise XOR
-                if(temp[i+j]!=gen[j])
+                if(temp[i+j] != gen[j])
                 {
-                    temp[i+j]='1';
+                    temp[i+j] = '1';
                 }
-                else if(temp[i+j]==gen[j] && gen[j]=='1')
+                else if(temp[i+j] == gen[j] && gen[j] == '1')
                 {
-                    temp[i+j]='0';
+                    temp[i+j] = '0';
                 }
             }
-            while(i<m-n-1 && temp[i+1]!='1')
+            while(i<m-n-1 && temp[i+1] != '1')
             {
                 i++;
             }               
         }
     }
     char ans[10000];
-    for(int i=0;i<n-1;i++)					// ans--> last 8 bits of the CRC generated
+    for(int i=0; i<n-1; i++)					// ans--> last 8 bits of the CRC generated
     {
         ans[i] = temp[m-n+1+i];
     }
-    ans[n-1]='\0';   					//termnating string
-    strcat(msg,ans); 					//appending CRC to original message
+    ans[n-1] = '\0';   					//termnating string
+    strcat(msg, ans); 					//appending CRC to original message
     return msg;
 }
 
@@ -402,31 +402,31 @@ int crc_check(char* msg)
 {
     char gen[] = "100000111";
     char temp[10000];
-    strcpy(temp,msg);
-    int m=0;
-    int n=0;     
-    while(msg[m]!='\0')      // calculating length
+    strcpy(temp, msg);
+    int m = 0;
+    int n = 0;     
+    while(msg[m] != '\0')      // calculating length
     {
         m++;
     }
-    while(gen[n]!='\0')
+    while(gen[n] != '\0')
     {
         n++;
     }
-    msg[m]='\0';   
-    for(int i=0;i <= m-n;i++)
+    msg[m] = '\0';   
+    for(int i=0; i <= m-n; i++)
     {
-        if(temp[i]=='1')					//Performing division by bitwise XOR
+        if(temp[i] == '1')					//Performing division by bitwise XOR
         {
-            for(int j=0;j<n;j++)
+            for(int j=0; j<n; j++)
             {
-                if(temp[i+j]!=gen[j]) 			//bit=1 if different bits 
+                if(temp[i+j] != gen[j]) 			//bit=1 if different bits 
                 {
-                    temp[i+j]='1';
+                    temp[i+j] = '1';
                 }
-                else if(temp[i+j]==gen[j] && gen[j]=='1')
+                else if(temp[i+j] == gen[j] && gen[j] == '1')
                 {
-                    temp[i+j]='0';
+                    temp[i+j] = '0';
                 }
             }
             while(i<m-n-1 && temp[i+1]!='1')			//traversing to find the first '1'
@@ -435,9 +435,9 @@ int crc_check(char* msg)
             } 
         }
     }
-    for(int i=0;i<m;i++)						//if any bit is 1, report error
+    for(int i=0; i<m; i++)						//if any bit is 1, report error
     {
-        if(temp[i]=='1')
+        if(temp[i] == '1')
         {
             return 0;
         }
@@ -447,13 +447,13 @@ int crc_check(char* msg)
 
 
 /* Introducing error in one random bit of the T(x) according to user given probability */
-char *error_gen(char *s,double p)		//code to generate error
+char *error_gen(char *s, double p)		//code to generate error
 {
 	int lower = 0;						
 	int upper = strlen(s)-1;
 	double random_num = (double)rand() / (double)RAND_MAX;
 	printf("Random Number generated  : %lf\n",random_num);
-	if(random_num<=p)
+	if(random_num <= p)
 	{
 											//to generate random number in range [0, messageLength-1]
 		int index = rand()%(upper-lower+1) + lower;
